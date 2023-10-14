@@ -43,13 +43,13 @@ void unique_lock_swap(Data& d, Data& d1)
 }
 void lock_swap(Data& d, Data& d1)
 {
-	std::unique_lock lock(d1.mutex, std::defer_lock);
-	std::unique_lock lock1(d.mutex, std::defer_lock);
-	std::lock(lock, lock1);
+	std::lock(d.mx, d1.mx);
 	std::swap(d1.int_value, d.int_value);
 	std::swap(d1.char_value, d.char_value);
 	std::swap(d1.double_value, d.double_value);
 	std::swap(d1.bool_value, d.bool_value);
+	d.mx.unlock();
+	d1.mx.unlock();
 }
 
 int main()
@@ -59,8 +59,8 @@ int main()
 	d1.printdata();
 	d2.printdata();
 	std::thread t1(sc_lock_swap, std::ref(d1), std::ref(d2));
-	std::thread t2(unique_lock_swap, std::ref(d1), std::ref(d2));
 	std::thread t3(lock_swap, std::ref(d1), std::ref(d2));
+	std::thread t2(unique_lock_swap, std::ref(d1), std::ref(d2));
 	t1.join();
 	t2.join();
 	t3.join();
